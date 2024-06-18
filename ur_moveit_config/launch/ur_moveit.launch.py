@@ -31,8 +31,9 @@
 
 import os
 
-from launch_ros.actions import Node
+from launch_ros.actions import Node, ComposableNodeContainer
 from launch_ros.substitutions import FindPackageShare
+from launch_ros.descriptions import ComposableNode
 from ur_moveit_config.launch_common import load_yaml
 
 from launch import LaunchDescription
@@ -237,6 +238,28 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
 
+    # Launch as much as possible in components
+    container = ComposableNodeContainer(
+        name="moveit_servo_container",
+        namespace="/",
+        package="rclcpp_components",
+        condition=IfCondition(launch_servo),
+        executable="component_container_mt",
+        composable_node_descriptions=[
+            ComposableNode(
+                package="moveit_servo",
+                plugin="moveit_servo::JoyToServoPub",
+                name="controller_to_servo_node",
+            ),
+            ComposableNode(
+                package="joy",
+                plugin="joy::Joy",
+                name="joy_node",
+            ),
+        ],
+        output="screen",
+    )
+
     # Servo node for realtime control
     servo_yaml = load_yaml("ur_moveit_config", "config/ur_servo.yaml")
     servo_params = {"moveit_servo": servo_yaml}
@@ -252,7 +275,8 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
     )
 
-    nodes_to_start = [move_group_node, rviz_node, servo_node]
+    nodes_to_start = [move_group_node, rviz_node, container, servo_node]
+    # nodes_to_start = [move_group_node, rviz_node, servo_node]
 
     return nodes_to_start
 
