@@ -34,6 +34,7 @@ import os
 from launch_ros.actions import Node, ComposableNodeContainer
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.descriptions import ComposableNode
+from launch_ros.parameter_descriptions import ParameterValue
 from ur_moveit_config.launch_common import load_yaml
 
 from launch import LaunchDescription
@@ -75,52 +76,58 @@ def launch_setup(context, *args, **kwargs):
         [FindPackageShare(description_package), "config", ur_type, "visual_parameters.yaml"]
     )
 
-    robot_description_content = Command(
-        [
-            PathJoinSubstitution([FindExecutable(name="xacro")]),
-            " ",
-            PathJoinSubstitution([FindPackageShare(description_package), "urdf", description_file]),
-            " ",
-            "robot_ip:=xxx.yyy.zzz.www",
-            " ",
-            "joint_limit_params:=",
-            joint_limit_params,
-            " ",
-            "kinematics_params:=",
-            kinematics_params,
-            " ",
-            "physical_params:=",
-            physical_params,
-            " ",
-            "visual_params:=",
-            visual_params,
-            " ",
-            "safety_limits:=",
-            safety_limits,
-            " ",
-            "safety_pos_margin:=",
-            safety_pos_margin,
-            " ",
-            "safety_k_position:=",
-            safety_k_position,
-            " ",
-            "name:=",
-            "ur",
-            " ",
-            "ur_type:=",
-            ur_type,
-            " ",
-            "script_filename:=ros_control.urscript",
-            " ",
-            "input_recipe_filename:=rtde_input_recipe.txt",
-            " ",
-            "output_recipe_filename:=rtde_output_recipe.txt",
-            " ",
-            "prefix:=",
-            prefix,
-            " ",
-        ]
-    )
+    # robot_description_content = Command(
+    #     [
+    #         PathJoinSubstitution([FindExecutable(name="xacro")]),
+    #         " ",
+    #         PathJoinSubstitution([FindPackageShare(description_package), "urdf", description_file]),
+    #         " ",
+    #         "robot_ip:=xxx.yyy.zzz.www",
+    #         " ",
+    #         "joint_limit_params:=",
+    #         joint_limit_params,
+    #         " ",
+    #         "kinematics_params:=",
+    #         kinematics_params,
+    #         " ",
+    #         "physical_params:=",
+    #         physical_params,
+    #         " ",
+    #         "visual_params:=",
+    #         visual_params,
+    #         " ",
+    #         "safety_limits:=",
+    #         safety_limits,
+    #         " ",
+    #         "safety_pos_margin:=",
+    #         safety_pos_margin,
+    #         " ",
+    #         "safety_k_position:=",
+    #         safety_k_position,
+    #         " ",
+    #         "name:=",
+    #         "ur",
+    #         " ",
+    #         "ur_type:=",
+    #         ur_type,
+    #         " ",
+    #         "script_filename:=ros_control.urscript",
+    #         " ",
+    #         "input_recipe_filename:=rtde_input_recipe.txt",
+    #         " ",
+    #         "output_recipe_filename:=rtde_output_recipe.txt",
+    #         " ",
+    #         "prefix:=",
+    #         prefix,
+    #         " ",
+    #     ]
+    # )
+
+    # Felipe: Temporal fix to use UR+Sensors as robot description for MoveIt!
+    # Check if this is really necesary
+    robot_description_content = ParameterValue(Command(['xacro ', PathJoinSubstitution([FindPackageShare('breaking_rock_worlds'), 
+                                        'robots', 'ur5_hammer_stereo_camera_set.urdf.xacro'])]), value_type=str)
+
     robot_description = {"robot_description": robot_description_content}
 
     # MoveIt Configuration
@@ -190,13 +197,22 @@ def launch_setup(context, *args, **kwargs):
         "publish_planning_scene": True,
         "publish_geometry_updates": True,
         "publish_state_updates": True,
+        "publish_octomap_updates": True, #inventado :c
         "publish_transforms_updates": True,
+        "publish_robot_description":True,
+        "publish_robot_description_semantic":True
     }
 
     warehouse_ros_config = {
         "warehouse_plugin": "warehouse_ros_sqlite::DatabaseConnection",
         "warehouse_host": warehouse_sqlite_path,
     }
+
+    octomap_config = {'octomap_frame': 'left_lidar_link', 
+                      'octomap_resolution': 0.05,
+                      'max_range': 10.0}
+
+    octomap_updater_config = load_yaml('ur_moveit_config', 'config/octomap_params.yaml')
 
     # Start the actual move_group node/action server
     move_group_node = Node(
@@ -214,6 +230,8 @@ def launch_setup(context, *args, **kwargs):
             planning_scene_monitor_parameters,
             {"use_sim_time": use_sim_time},
             warehouse_ros_config,
+            octomap_config,
+            octomap_updater_config,
         ],
     )
 
@@ -238,7 +256,7 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
 
-    # Launch as much as possible in components
+    # Needed nodes for operating Servo with Joy
     container = ComposableNodeContainer(
         name="moveit_servo_container",
         namespace="/",
