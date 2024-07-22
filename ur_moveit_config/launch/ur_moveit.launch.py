@@ -197,7 +197,6 @@ def launch_setup(context, *args, **kwargs):
         "publish_planning_scene": True,
         "publish_geometry_updates": True,
         "publish_state_updates": True,
-        "publish_octomap_updates": True, #inventado :c
         "publish_transforms_updates": True,
         "publish_robot_description":True,
         "publish_robot_description_semantic":True
@@ -215,7 +214,28 @@ def launch_setup(context, *args, **kwargs):
     octomap_updater_config = load_yaml('ur_moveit_config', 'config/octomap_params.yaml')
 
     # Start the actual move_group node/action server
-    move_group_node = Node(
+    move_group_node_1 = Node(
+        name="move_group_node_1",
+        package="moveit_ros_move_group",
+        executable="move_group",
+        output="screen",
+        parameters=[
+            robot_description,
+            robot_description_semantic,
+            robot_description_kinematics,
+            robot_description_planning,
+            ompl_planning_pipeline_config,
+            trajectory_execution,
+            moveit_controllers,
+            planning_scene_monitor_parameters,
+            {"use_sim_time": use_sim_time},
+            warehouse_ros_config,
+            octomap_config,
+            octomap_updater_config,
+        ],
+    )
+    move_group_node_2 = Node(
+        name="move_group_node_2",
         package="moveit_ros_move_group",
         executable="move_group",
         output="screen",
@@ -293,7 +313,8 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
     )
 
-    nodes_to_start = [move_group_node, rviz_node, container, servo_node]
+    nodes_to_start = [move_group_node_1, rviz_node, container, servo_node]
+    # nodes_to_start = [move_group_node_1, move_group_node_2, rviz_node, container, servo_node]
     # nodes_to_start = [move_group_node, rviz_node, servo_node]
 
     return nodes_to_start
