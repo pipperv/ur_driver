@@ -208,7 +208,7 @@ def launch_setup(context, *args, **kwargs):
     }
 
     octomap_config = {'octomap_frame': 'left_lidar_link', 
-                      'octomap_resolution': 0.05,
+                      'octomap_resolution': 0.04,
                       'max_range': 10.0}
 
     octomap_updater_config = load_yaml('ur_moveit_config', 'config/octomap_params.yaml')
@@ -371,7 +371,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "description_file",
-            default_value="ur.urdf.xacro",
+            default_value="ur_sim.urdf.xacro",
             description="URDF/XACRO description file with the robot.",
         )
     )
@@ -386,7 +386,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "moveit_config_file",
-            default_value="ur.srdf.xacro",
+            default_value="ur_hammer.srdf.xacro",
             description="MoveIt SRDF/XACRO description file with the robot.",
         )
     )
