@@ -289,13 +289,23 @@ def launch_setup(context, *args, **kwargs):
                 plugin="moveit_servo::JoyToServoPub",
                 name="controller_to_servo_node",
             ),
-            ComposableNode(
-                package="joy",
-                plugin="joy::Joy",
-                name="joy_node",
-            ),
+            # ComposableNode(
+            #     package="joy",
+            #     plugin="joy::Joy",
+            #     name="joy_node",
+            # ),
         ],
         output="screen",
+    )
+
+    # Launch joy_node
+    joy_node = Node(
+        package="joy",
+        executable="joy_node",
+        name="joy_node",
+        parameters=[{"dev": "/dev/input/js0"}],
+        output="screen",
+        remappings=[("/joy", "/JOYSTICK/joy")],
     )
 
     # Servo node for realtime control
@@ -313,7 +323,7 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
     )
 
-    nodes_to_start = [move_group_node_1, rviz_node, container, servo_node]
+    nodes_to_start = [move_group_node_1, rviz_node, joy_node, container, servo_node]
     # nodes_to_start = [move_group_node_1, move_group_node_2, rviz_node, container, servo_node]
     # nodes_to_start = [move_group_node, rviz_node, servo_node]
 
