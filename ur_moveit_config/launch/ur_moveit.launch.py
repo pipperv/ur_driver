@@ -305,7 +305,7 @@ def launch_setup(context, *args, **kwargs):
         name="joy_node",
         parameters=[{"dev": "/dev/input/js0"}],
         output="screen",
-        remappings=[("/joy", "/JOYSTICK/joy")],
+        remappings=[("/joy", "/NSW_JOY/joy")],
     )
 
     # Servo node for realtime control
