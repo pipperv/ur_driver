@@ -439,7 +439,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "description_file",
-            default_value="ur.urdf.xacro",
+            default_value="ur_hammer.urdf.xacro",
             description="URDF/XACRO description file with the robot.",
         )
     )
@@ -498,7 +498,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "initial_joint_controller",
-            default_value="scaled_joint_trajectory_controller",
+            default_value="forward_velocity_controller",
             description="Initially loaded robot controller.",
         )
     )

@@ -1,15 +1,15 @@
 ###############################################
 # Modify all parameters related to servoing here
 ###############################################
-use_gazebo: true # Whether the robot is started in a Gazebo simulation environment
+use_gazebo: false # Whether the robot is started in a Gazebo simulation environment
 
 ## Properties of incoming commands
 command_in_type: "unitless" # "unitless"> in the range [-1:1], as if from joystick. "speed_units"> cmds are in m/s and rad/s
 scale:
   # Scale parameters are only used if command_in_type=="unitless"
   # linear:  0.07 # Max linear velocity. Meters per publish_period. Unit is [m/s]. Only used for Cartesian commands.
-  linear:  0.15 # Max linear velocity. Meters per publish_period. Unit is [m/s]. Only used for Cartesian commands.
-  rotational:  0.3 # Max angular velocity. Rads per publish_period. Unit is [rad/s]. Only used for Cartesian commands.
+  linear:  0.05 # Max linear velocity. Meters per publish_period. Unit is [m/s]. Only used for Cartesian commands.
+  rotational:  0.15 # Max angular velocity. Rads per publish_period. Unit is [rad/s]. Only used for Cartesian commands.
   # Max joint angular/linear velocity. Rads or Meters per publish period. Only used for joint commands on joint_command_in_topic.
   joint: 0.5
 # This is a fudge factor to account for any latency in the system, e.g. network latency or poor low-level
@@ -38,7 +38,7 @@ low_pass_filter_coeff: 10.0  # Larger --> trust the filtered data more, trust th
 
 ## MoveIt properties
 move_group_name:  ur_manipulator  # Often 'manipulator' or 'arm'
-planning_frame: base_link  # The MoveIt planning frame. Often 'base_link' or 'world'
+planning_frame: world  # The MoveIt planning frame. Often 'base_link' or 'world'
 
 ## Other frames
 ee_frame_name: end_effector  # The name of the end effector link, used to return the EE pose

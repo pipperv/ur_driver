@@ -76,57 +76,57 @@ def launch_setup(context, *args, **kwargs):
         [FindPackageShare(description_package), "config", ur_type, "visual_parameters.yaml"]
     )
 
-    # robot_description_content = Command(
-    #     [
-    #         PathJoinSubstitution([FindExecutable(name="xacro")]),
-    #         " ",
-    #         PathJoinSubstitution([FindPackageShare(description_package), "urdf", description_file]),
-    #         " ",
-    #         "robot_ip:=xxx.yyy.zzz.www",
-    #         " ",
-    #         "joint_limit_params:=",
-    #         joint_limit_params,
-    #         " ",
-    #         "kinematics_params:=",
-    #         kinematics_params,
-    #         " ",
-    #         "physical_params:=",
-    #         physical_params,
-    #         " ",
-    #         "visual_params:=",
-    #         visual_params,
-    #         " ",
-    #         "safety_limits:=",
-    #         safety_limits,
-    #         " ",
-    #         "safety_pos_margin:=",
-    #         safety_pos_margin,
-    #         " ",
-    #         "safety_k_position:=",
-    #         safety_k_position,
-    #         " ",
-    #         "name:=",
-    #         "ur",
-    #         " ",
-    #         "ur_type:=",
-    #         ur_type,
-    #         " ",
-    #         "script_filename:=ros_control.urscript",
-    #         " ",
-    #         "input_recipe_filename:=rtde_input_recipe.txt",
-    #         " ",
-    #         "output_recipe_filename:=rtde_output_recipe.txt",
-    #         " ",
-    #         "prefix:=",
-    #         prefix,
-    #         " ",
-    #     ]
-    # )
+    robot_description_content = Command(
+        [
+            PathJoinSubstitution([FindExecutable(name="xacro")]),
+            " ",
+            PathJoinSubstitution([FindPackageShare(description_package), "urdf", description_file]),
+            " ",
+            "robot_ip:=xxx.yyy.zzz.www",
+            " ",
+            "joint_limit_params:=",
+            joint_limit_params,
+            " ",
+            "kinematics_params:=",
+            kinematics_params,
+            " ",
+            "physical_params:=",
+            physical_params,
+            " ",
+            "visual_params:=",
+            visual_params,
+            " ",
+            "safety_limits:=",
+            safety_limits,
+            " ",
+            "safety_pos_margin:=",
+            safety_pos_margin,
+            " ",
+            "safety_k_position:=",
+            safety_k_position,
+            " ",
+            "name:=",
+            "ur",
+            " ",
+            "ur_type:=",
+            ur_type,
+            " ",
+            "script_filename:=ros_control.urscript",
+            " ",
+            "input_recipe_filename:=rtde_input_recipe.txt",
+            " ",
+            "output_recipe_filename:=rtde_output_recipe.txt",
+            " ",
+            "prefix:=",
+            prefix,
+            " ",
+        ]
+    )
 
     # Felipe: Temporal fix to use UR+Sensors as robot description for MoveIt!
     # Check if this is really necesary
-    robot_description_content = ParameterValue(Command(['xacro ', PathJoinSubstitution([FindPackageShare('breaking_rock_worlds'), 
-                                        'robots', 'ur5_hammer_stereo_camera_set.urdf.xacro'])]), value_type=str)
+    # robot_description_content = ParameterValue(Command(['xacro ', PathJoinSubstitution([FindPackageShare('breaking_rock_worlds'), 
+    #                                     'robots', 'ur5_hammer_stereo_camera_set.urdf.xacro'])]), value_type=str)
 
     robot_description = {"robot_description": robot_description_content}
 
@@ -214,28 +214,8 @@ def launch_setup(context, *args, **kwargs):
     octomap_updater_config = load_yaml('ur_moveit_config', 'config/octomap_params.yaml')
 
     # Start the actual move_group node/action server
-    move_group_node_1 = Node(
+    move_group_node = Node(
         name="move_group_node_1",
-        package="moveit_ros_move_group",
-        executable="move_group",
-        output="screen",
-        parameters=[
-            robot_description,
-            robot_description_semantic,
-            robot_description_kinematics,
-            robot_description_planning,
-            ompl_planning_pipeline_config,
-            trajectory_execution,
-            moveit_controllers,
-            planning_scene_monitor_parameters,
-            {"use_sim_time": use_sim_time},
-            warehouse_ros_config,
-            octomap_config,
-            octomap_updater_config,
-        ],
-    )
-    move_group_node_2 = Node(
-        name="move_group_node_2",
         package="moveit_ros_move_group",
         executable="move_group",
         output="screen",
@@ -299,14 +279,14 @@ def launch_setup(context, *args, **kwargs):
     )
 
     # Launch joy_node
-    joy_node = Node(
-        package="joy",
-        executable="joy_node",
-        name="joy_node",
-        parameters=[{"dev": "/dev/input/js0"}],
-        output="screen",
-        remappings=[("/joy", "/NSW_JOY/joy")],
-    )
+    # joy_node = Node(
+    #     package="joy",
+    #     executable="joy_node",
+    #     name="joy_node",
+    #     parameters=[{"dev": "/dev/input/js0"}],
+    #     output="screen",
+    #     remappings=[("/joy", "/NSW_JOY/joy")],
+    # )
 
     # Servo node for realtime control
     servo_yaml = load_yaml("ur_moveit_config", "config/ur_servo.yaml")
@@ -323,9 +303,7 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
     )
 
-    nodes_to_start = [move_group_node_1, rviz_node, joy_node, container, servo_node]
-    # nodes_to_start = [move_group_node_1, move_group_node_2, rviz_node, container, servo_node]
-    # nodes_to_start = [move_group_node, rviz_node, servo_node]
+    nodes_to_start = [move_group_node, rviz_node, container, servo_node]
 
     return nodes_to_start
 
@@ -381,7 +359,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "description_file",
-            default_value="ur_sim.urdf.xacro",
+            default_value="ur_hammer.urdf.xacro",
             description="URDF/XACRO description file with the robot.",
         )
     )
@@ -431,7 +409,7 @@ def generate_launch_description():
         )
     )
     declared_arguments.append(
-        DeclareLaunchArgument("launch_rviz", default_value="true", description="Launch RViz?")
+        DeclareLaunchArgument("launch_rviz", default_value="false", description="Launch RViz?")
     )
     declared_arguments.append(
         DeclareLaunchArgument("launch_servo", default_value="true", description="Launch Servo?")
