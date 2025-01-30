@@ -77,8 +77,6 @@ def launch_setup(context, *args, **kwargs):
     )
 
     if use_fake_hardware == "true":
-        # Felipe: Temporal fix to use UR+Sensors as robot description for MoveIt!
-        # Check if this is really necesary
         robot_description_content = ParameterValue(Command(['xacro ', PathJoinSubstitution([FindPackageShare('breaking_rock_worlds'), 
                                             'robots', 'ur5_hammer_stereo_camera_set.urdf.xacro'])]), value_type=str)
     else:
