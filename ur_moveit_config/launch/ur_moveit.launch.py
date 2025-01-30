@@ -76,57 +76,59 @@ def launch_setup(context, *args, **kwargs):
         [FindPackageShare(description_package), "config", ur_type, "visual_parameters.yaml"]
     )
 
-    robot_description_content = Command(
-        [
-            PathJoinSubstitution([FindExecutable(name="xacro")]),
-            " ",
-            PathJoinSubstitution([FindPackageShare(description_package), "urdf", description_file]),
-            " ",
-            "robot_ip:=xxx.yyy.zzz.www",
-            " ",
-            "joint_limit_params:=",
-            joint_limit_params,
-            " ",
-            "kinematics_params:=",
-            kinematics_params,
-            " ",
-            "physical_params:=",
-            physical_params,
-            " ",
-            "visual_params:=",
-            visual_params,
-            " ",
-            "safety_limits:=",
-            safety_limits,
-            " ",
-            "safety_pos_margin:=",
-            safety_pos_margin,
-            " ",
-            "safety_k_position:=",
-            safety_k_position,
-            " ",
-            "name:=",
-            "ur",
-            " ",
-            "ur_type:=",
-            ur_type,
-            " ",
-            "script_filename:=ros_control.urscript",
-            " ",
-            "input_recipe_filename:=rtde_input_recipe.txt",
-            " ",
-            "output_recipe_filename:=rtde_output_recipe.txt",
-            " ",
-            "prefix:=",
-            prefix,
-            " ",
-        ]
-    )
-
-    # Felipe: Temporal fix to use UR+Sensors as robot description for MoveIt!
-    # Check if this is really necesary
-    # robot_description_content = ParameterValue(Command(['xacro ', PathJoinSubstitution([FindPackageShare('breaking_rock_worlds'), 
-    #                                     'robots', 'ur5_hammer_stereo_camera_set.urdf.xacro'])]), value_type=str)
+    if use_fake_hardware == "true":
+        # Felipe: Temporal fix to use UR+Sensors as robot description for MoveIt!
+        # Check if this is really necesary
+        robot_description_content = ParameterValue(Command(['xacro ', PathJoinSubstitution([FindPackageShare('breaking_rock_worlds'), 
+                                            'robots', 'ur5_hammer_stereo_camera_set.urdf.xacro'])]), value_type=str)
+    else:
+        robot_description_content = Command(
+            [
+                PathJoinSubstitution([FindExecutable(name="xacro")]),
+                " ",
+                PathJoinSubstitution([FindPackageShare(description_package), "urdf", description_file]),
+                " ",
+                "robot_ip:=xxx.yyy.zzz.www",
+                " ",
+                "joint_limit_params:=",
+                joint_limit_params,
+                " ",
+                "kinematics_params:=",
+                kinematics_params,
+                " ",
+                "physical_params:=",
+                physical_params,
+                " ",
+                "visual_params:=",
+                visual_params,
+                " ",
+                "safety_limits:=",
+                safety_limits,
+                " ",
+                "safety_pos_margin:=",
+                safety_pos_margin,
+                " ",
+                "safety_k_position:=",
+                safety_k_position,
+                " ",
+                "name:=",
+                "ur",
+                " ",
+                "ur_type:=",
+                ur_type,
+                " ",
+                "script_filename:=ros_control.urscript",
+                " ",
+                "input_recipe_filename:=rtde_input_recipe.txt",
+                " ",
+                "output_recipe_filename:=rtde_output_recipe.txt",
+                " ",
+                "prefix:=",
+                prefix,
+                " ",
+            ]
+        )
+        
 
     robot_description = {"robot_description": robot_description_content}
 
@@ -215,7 +217,7 @@ def launch_setup(context, *args, **kwargs):
 
     # Start the actual move_group node/action server
     move_group_node = Node(
-        name="move_group_node_1",
+        name="move_group_node",
         package="moveit_ros_move_group",
         executable="move_group",
         output="screen",
